@@ -1,5 +1,5 @@
 const clientId = "3e96f6baa32b4a98b1a3cb8d235d3d55";  // Vervang door jouw Spotify Client ID
-const redirectUri = "https://chantyk.github.io/HitScan/callback";  // Vervang door jouw redirect URI
+const redirectUri = "https://chantyk.github.io/HitScan/callback";  // Zorg dat dit hetzelfde is als in je Spotify Developer Console
 const seekTime = 30000;  // 30 seconden in milliseconden
 
 // Haal track-ID op uit de URL
@@ -8,19 +8,25 @@ function getTrackIdFromUrl() {
     return params.get("track");
 }
 
-// Spotify login
+// Spotify login functie
 function login() {
     const scopes = "user-modify-playback-state user-read-playback-state";
     window.location = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
 }
 
-// Haal het token op
+// Haal het token op uit localStorage of de URL
 function getAccessToken() {
-    const token = localStorage.getItem("access_token");
-    console.log("Access token vanuit localStorage:", token); // Dit moet het token loggen naar de console
+    const token = localStorage.getItem("spotify_access_token");  // Haal token uit localStorage
     if (!token) {
-        login(); // Als er geen token is, vraag om inloggen
-        return;
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const tokenFromUrl = params.get("access_token");
+        
+        if (tokenFromUrl) {
+            localStorage.setItem("spotify_access_token", tokenFromUrl);  // Bewaar token in localStorage
+            window.location.hash = '';  // Verwijder de token uit de URL
+            return tokenFromUrl;
+        }
     }
     return token;
 }
@@ -34,14 +40,12 @@ async function playTrack() {
     }
 
     const trackId = getTrackIdFromUrl();  // Haal track-ID op uit de URL
-    console.log("Track-ID:", trackId); // Log de track-ID naar de console
     if (!trackId) {
         console.error("Geen track-ID gevonden in de URL.");
         return;
     }
 
     try {
-        console.log("Spotify API aanroepen met token:", token);
         // Start de track
         await fetch("https://api.spotify.com/v1/me/player/play", {
             method: "PUT",
