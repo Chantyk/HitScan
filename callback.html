@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Callback</title>
+    <title>Callback</title>
 </head>
 <body>
-    <h1>Spotify Callback</h1>
     <script>
-        // Haal de toegangstoken op uit de URL
-        const hash = window.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
-        const accessToken = params.get("access_token");
+        // Verkrijg de access token uit de URL na inloggen
+        function getAccessToken() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const token = params.get("access_token");
 
-        if (accessToken) {
-            // Sla het access token op in de session storage voor later gebruik
-            sessionStorage.setItem("spotifyAccessToken", accessToken);
-            window.location.href = "https://chantyk.github.io/HitScan/";  // Verwijs de gebruiker terug naar de hoofdsite
-        } else {
-            console.error("Er is geen toegangstoken gevonden.");
+            // Controleer of het token aanwezig is
+            if (token) {
+                localStorage.setItem("access_token", token); // Bewaar het token lokaal
+                window.location.href = "https://chantyk.github.io/HitScan/"; // Redirect terug naar de homepage
+            } else {
+                console.log("Geen access token gevonden");
+            }
         }
+
+        getAccessToken(); // Roep de functie aan om het token te extraheren
     </script>
 </body>
 </html>
