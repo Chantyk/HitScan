@@ -1,5 +1,5 @@
 const clientId = "3e96f6baa32b4a98b1a3cb8d235d3d55";  // Vervang door jouw Spotify Client ID
-const redirectUri = "https://chantyk.github.io/HitScan/callback";  // Vervang door jouw redirect URI (bijvoorbeeld: https://chantyk.github.io/HitScan/)
+const redirectUri = "https://chantyk.github.io/HitScan/callback";  // Vervang door jouw redirect URI
 const seekTime = 30000;  // 30 seconden in milliseconden
 
 // Haal track-ID op uit de URL
@@ -8,17 +8,25 @@ function getTrackIdFromUrl() {
     return params.get("track");
 }
 
+// Haal het access token op uit de URL na inloggen
+function getAccessToken() {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get("access_token");
+
+    if (accessToken) {
+        // Verwijder het access token uit de URL om herladen te voorkomen
+        window.location.hash = '';
+        return accessToken;
+    }
+
+    return null;
+}
+
 // Spotify login
 function login() {
     const scopes = "user-modify-playback-state user-read-playback-state";
     window.location = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
-}
-
-// Haal het token op
-function getAccessToken() {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    return params.get("access_token");
 }
 
 // Start het specifieke nummer op 30 sec
@@ -57,5 +65,10 @@ async function playTrack() {
 
 // Voeg event listener toe aan de knop
 document.getElementById("playButton").addEventListener("click", async () => {
-    await playTrack();
+    const token = getAccessToken();
+    if (token) {
+        await playTrack();
+    } else {
+        login();
+    }
 });
