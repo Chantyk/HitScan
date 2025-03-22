@@ -16,7 +16,8 @@ function login() {
 
 // Haal het token op uit localStorage of de URL
 function getAccessToken() {
-    const token = localStorage.getItem("spotify_access_token");  // Haal token uit localStorage
+    let token = localStorage.getItem("spotify_access_token");  // Haal token uit localStorage
+    console.log("Haal token op:", token);  // Log het token naar de console
     if (!token) {
         const hash = window.location.hash.substring(1);
         const params = new URLSearchParams(hash);
@@ -25,7 +26,8 @@ function getAccessToken() {
         if (tokenFromUrl) {
             localStorage.setItem("spotify_access_token", tokenFromUrl);  // Bewaar token in localStorage
             window.location.hash = '';  // Verwijder de token uit de URL
-            return tokenFromUrl;
+            token = tokenFromUrl;  // Zet token om van de URL
+            console.log("Token uit URL opgeslagen:", token);  // Log de token die uit de URL is gehaald
         }
     }
     return token;
@@ -35,7 +37,8 @@ function getAccessToken() {
 async function playTrack() {
     const token = getAccessToken();
     if (!token) {
-        login();
+        console.log("Geen toegangstoken gevonden. Gebruiker wordt doorgestuurd naar inlogpagina.");
+        login();  // Als er geen token is, stuur de gebruiker naar de login pagina
         return;
     }
 
@@ -46,20 +49,34 @@ async function playTrack() {
     }
 
     try {
+        console.log("Start track met ID:", trackId);
+
         // Start de track
-        await fetch("https://api.spotify.com/v1/me/player/play", {
+        const response = await fetch("https://api.spotify.com/v1/me/player/play", {
             method: "PUT",
             headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
             body: JSON.stringify({ "uris": ["spotify:track:" + trackId] })
         });
 
-        // Seek naar 30 seconden
-        setTimeout(async () => {
-            await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${seekTime}`, {
-                method: "PUT",
-                headers: { "Authorization": `Bearer ${token}` }
-            });
-        }, 1000);  // Wacht 1 seconde voordat je naar de 30 seconden gaat
+        // Controleer of de API-aanroep succesvol was
+        if (response.ok) {
+            console.log("Track gestart!");
+            // Seek naar 30 seconden
+            setTimeout(async () => {
+                const seekResponse = await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${seekTime}`, {
+                    method: "PUT",
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                
+                if (seekResponse.ok) {
+                    console.log("Track staat op 30 seconden.");
+                } else {
+                    console.error("Fout bij seeken:", seekResponse.status);
+                }
+            }, 1000);  // Wacht 1 seconde voordat je naar de 30 seconden gaat
+        } else {
+            console.error("Fout bij het starten van de track:", response.status);
+        }
     } catch (error) {
         console.error("Fout bij afspelen:", error);
     }
