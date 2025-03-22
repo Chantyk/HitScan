@@ -3,27 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Callback</title>
+    <title>Spotify Callback</title>
 </head>
 <body>
+    <h1>Je kunt nu terug naar de app!</h1>
+    <p>Je bent succesvol ingelogd, klik <a href="https://chantyk.github.io/HitScan/">hier</a> om terug te gaan.</p>
+
     <script>
-        // Verkrijg de access token uit de URL na inloggen
-        function getAccessToken() {
-            const hash = window.location.hash.substring(1); // Haal alles na de '#' op
-            const params = new URLSearchParams(hash); // Zet om in een makkelijk leesbaar format
-            const token = params.get("access_token"); // Haal het access_token uit de URL
+        // Nadat de gebruiker toestemming heeft gegeven, slaan we het token op
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const token = params.get("access_token");
 
-            console.log("Token in callback:", token); // Log het token naar de console
-
-            if (token) {
-                localStorage.setItem("access_token", token); // Bewaar het token in localStorage
-                window.location.href = "https://chantyk.github.io/HitScan/"; // Redirect naar de hoofdpagina
-            } else {
-                console.log("Geen access token gevonden");
-            }
+        if (token) {
+            // Sla het token op in localStorage
+            localStorage.setItem("spotify_access_token", token);
+            window.location.href = "https://chantyk.github.io/HitScan/";  // Redirect naar de hoofdpagina
         }
-
-        getAccessToken(); // Roep de functie aan om het token te extraheren
     </script>
 </body>
 </html>
