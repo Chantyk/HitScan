@@ -1,5 +1,5 @@
-const clientId = "JOUW_SPOTIFY_CLIENT_ID";  // Vervang door jouw Spotify Client ID
-const redirectUri = "JOUW_REDIRECT_URI";  // Vervang door jouw redirect URI (bijvoorbeeld: https://chantyk.github.io/HitScan/)
+const clientId = "3e96f6baa32b4a98b1a3cb8d235d3d55";  // Vervang door jouw Spotify Client ID
+const redirectUri = "https://chantyk.github.io/HitScan/callback";  // Vervang door jouw redirect URI (bijvoorbeeld: https://chantyk.github.io/HitScan/)
 const seekTime = 30000;  // 30 seconden in milliseconden
 
 // Haal track-ID op uit de URL
