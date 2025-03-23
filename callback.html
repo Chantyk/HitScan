@@ -6,24 +6,18 @@
     <title>Callback</title>
 </head>
 <body>
+    <h1>Callback Pagina</h1>
+    <p>We wachten op je actie...</p>
+    
     <script>
-        // Verkrijg de access token uit de URL na inloggen
-        function getAccessToken() {
-            const hash = window.location.hash.substring(1); // Haal alles na de '#' op
-            const params = new URLSearchParams(hash); // Zet om in een makkelijk leesbaar format
-            const token = params.get("access_token"); // Haal het access_token uit de URL
-
-            console.log("Token in callback:", token); // Log het token naar de console
-
-            if (token) {
-                localStorage.setItem("access_token", token); // Bewaar het token in localStorage
-                window.location.href = "https://chantyk.github.io/HitScan/"; // Redirect naar de hoofdpagina
-            } else {
-                console.log("Geen access token gevonden");
-            }
+        // Zet de access token in de localStorage zodat we deze later kunnen gebruiken
+        const accessToken = new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+        if (accessToken) {
+            localStorage.setItem("access_token", accessToken);
+            window.location.href = "index.html";  // Redirect naar de hoofd pagina
+        } else {
+            console.error("Geen access token gevonden.");
         }
-
-        getAccessToken(); // Roep de functie aan om het token te extraheren
     </script>
 </body>
 </html>
