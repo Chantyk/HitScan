@@ -19,6 +19,12 @@
   <script>
     // Functie voor het initialiseren van de QR-code scanner
     function startQRCodeScanner() {
+      if (typeof Html5Qrcode === "undefined") {
+        console.error("Html5Qrcode bibliotheek is niet geladen.");
+        document.getElementById('status').innerText = "Er is een fout opgetreden bij het laden van de scanner bibliotheek.";
+        return;
+      }
+
       const html5QrCode = new Html5Qrcode("qr-reader");
 
       html5QrCode.start(
