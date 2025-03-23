@@ -1,89 +1,43 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HitScan - Spotify Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HitScan - Callback</title>
 </head>
 <body>
-    <h1>Bedankt voor het inloggen!</h1>
-    <p>We halen nu de gegevens op om muziek af te spelen...</p>
+  <h1>Login succesvol! Je kunt nu teruggaan naar de app.</h1>
 
-    <script>
-        // Haal de toegangstoken en track uit de URL
-        const urlParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = urlParams.get('access_token');
-        const trackId = new URLSearchParams(window.location.search).get('track'); // Haal track parameter uit query string
+  <script>
+    // Verkrijg de 'code' query parameter van de URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
 
-        if (accessToken) {
-            // Sla de access token op in localStorage voor later gebruik
-            localStorage.setItem("spotifyAccessToken", accessToken);
-            
-            // Controleer of de token werkt door je gebruikersprofiel op te halen
-            checkAccessTokenValidity(accessToken);
-
-            // Als er een track parameter is, speel die dan af
-            if (trackId) {
-                playSong(accessToken, trackId);
-            } else {
-                alert("Geen track opgegeven in de URL.");
-            }
-        } else {
-            alert("Er is een probleem met je login.");
-        }
-
-        // Functie om te controleren of de token geldig is
-        function checkAccessTokenValidity(accessToken) {
-            fetch("https://api.spotify.com/v1/me", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error("Ongeldige token");
-                }
-            })
-            .then(data => {
-                console.log("Token is geldig! Gebruikersinformatie:", data);
-                alert("Token is geldig! Gebruiker: " + data.display_name);
-            })
-            .catch(error => {
-                console.error("Fout bij het controleren van de token:", error);
-                alert("Fout bij het controleren van de token.");
-            });
-        }
-
-        // Functie om muziek af te spelen
-        function playSong(accessToken, trackId) {
-            const songData = {
-                uris: [`spotify:track:${trackId}`]
-            };
-
-            const playSongUrl = "https://api.spotify.com/v1/me/player/play";
-
-            fetch(playSongUrl, {
-                method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(songData)
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log("Nummer wordt afgespeeld!");
-                } else {
-                    throw new Error("Er is een fout opgetreden bij het afspelen van het nummer.");
-                }
-            })
-            .catch(error => {
-                console.error("Fout bij het afspelen van de track:", error);
-            });
-        }
-    </script>
+    if (code) {
+      // De 'code' gebruiken om het access token te verkrijgen
+      fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: 'https://chantyk.github.io/HitScan/callback.html', // Dit moet de redirect URI zijn die je hebt opgegeven in Spotify
+          client_id: '3e96f6baa32b4a98b1a3cb8d235d3d55',
+          client_secret: 'jouw-client-secret-hier', // Voeg hier je client secret in
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        const accessToken = data.access_token;
+        localStorage.setItem('access_token', accessToken); // Sla het access token lokaal op
+        window.location.href = 'https://chantyk.github.io/HitScan'; // Redirect naar de hoofdapp
+      })
+      .catch(error => {
+        console.error('Er is iets mis gegaan bij het verkrijgen van het token:', error);
+      });
+    }
+  </script>
 </body>
 </html>
