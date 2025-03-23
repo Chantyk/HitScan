@@ -1,67 +1,17 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HitScan - Afspelen Track</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify QR Scanner</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Voeg de QR-code scanner bibliotheek toe -->
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
+  <h1>Scan een QR-code om een nummer af te spelen vanaf 30 seconden!</h1>
+  <div id="qr-reader"></div>
 
-    <h1>Welkom bij HitScan!</h1>
-    <p>We gaan nu een nummer afspelen...</p>
-
-    <script>
-        // Haal de trackID op uit de URL (bijv. ?track=1sOE4Tntq9oJvSGsNqhVUt)
-        const urlParams = new URLSearchParams(window.location.search);
-        const trackId = urlParams.get('track');
-
-        // Controleer of er een track ID aanwezig is
-        if (trackId) {
-            console.log("Track ID gevonden:", trackId);
-            // Probeer het nummer af te spelen
-            const accessToken = localStorage.getItem("spotifyAccessToken");
-            
-            if (accessToken) {
-                playSong(accessToken, trackId);
-            } else {
-                alert("Je bent niet ingelogd bij Spotify. Log eerst in.");
-            }
-        } else {
-            console.error("Geen track ID gevonden in de URL.");
-            alert("Geen track ID opgegeven in de URL.");
-        }
-
-        // Functie om muziek af te spelen
-        function playSong(accessToken, trackId) {
-            const songData = {
-                uris: [`spotify:track:${trackId}`]
-            };
-
-            const playSongUrl = "https://api.spotify.com/v1/me/player/play";
-
-            fetch(playSongUrl, {
-                method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(songData)
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    alert("Je sessie is verlopen. Log opnieuw in.");
-                    window.location.href = "https://chantyk.github.io/HitScan/callback.html"; // Of naar login-pagina
-                } else {
-                    return response.json();
-                }
-            })
-            .then(data => {
-                console.log("Nummer wordt afgespeeld:", data);
-            })
-            .catch(error => {
-                console.error("Fout bij afspelen nummer:", error);
-            });
-        }
-    </script>
+  <script src="script.js"></script>
 </body>
 </html>
