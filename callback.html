@@ -10,10 +10,10 @@
     <p>We halen nu de gegevens op om muziek af te spelen...</p>
 
     <script>
-        // Haal de toegangstoken uit de URL
+        // Haal de toegangstoken en track uit de URL
         const urlParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = urlParams.get('access_token');
-        const trackId = urlParams.get('track'); // Track ID via query parameter
+        const trackId = new URLSearchParams(window.location.search).get('track'); // Haal track parameter uit query string
 
         if (accessToken) {
             // Sla de access token op in localStorage voor later gebruik
