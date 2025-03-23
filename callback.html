@@ -17,7 +17,9 @@
         if (accessToken) {
             localStorage.setItem("spotify_access_token", accessToken);
             console.log("✅ Spotify token opgeslagen:", accessToken);
-            window.location.href = "index.html"; // Terug naar index.html
+
+            // Na het opslaan van het token, doorsturen naar de pagina voor het afspelen
+            window.location.href = "index.html"; // Of direct naar een andere pagina als de app moet starten
         } else {
             console.error("❌ Geen token gevonden in de URL!");
             alert("Geen token gevonden! Controleer de URL.");
