@@ -1,43 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HitScan - Callback</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Callback</title>
 </head>
 <body>
-  <h1>Login succesvol! Je kunt nu teruggaan naar de app.</h1>
-
-  <script>
-    // Verkrijg de 'code' query parameter van de URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-
-    if (code) {
-      // De 'code' gebruiken om het access token te verkrijgen
-      fetch('https://accounts.spotify.com/api/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code',
-          code: code,
-          redirect_uri: 'https://chantyk.github.io/HitScan/callback.html', // Dit moet de redirect URI zijn die je hebt opgegeven in Spotify
-          client_id: '3e96f6baa32b4a98b1a3cb8d235d3d55',
-          client_secret: 'jouw-client-secret-hier', // Voeg hier je client secret in
-        }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        const accessToken = data.access_token;
-        localStorage.setItem('access_token', accessToken); // Sla het access token lokaal op
-        window.location.href = 'https://chantyk.github.io/HitScan'; // Redirect naar de hoofdapp
-      })
-      .catch(error => {
-        console.error('Er is iets mis gegaan bij het verkrijgen van het token:', error);
-      });
-    }
-  </script>
+    <h1>Callback Pagina</h1>
+    <p>Je kunt deze pagina leeg laten, maar hier wordt de gebruiker teruggestuurd naar de app na de login bij Spotify.</p>
 </body>
 </html>
