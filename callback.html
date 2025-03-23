@@ -5,23 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify Auth Callback</title>
     <script>
+        // Haal de access token uit de URL
         function getTokenFromUrl() {
-            const hash = window.location.hash.substring(1);
+            const hash = window.location.hash.substring(1); // Haal het gedeelte na #
             const params = new URLSearchParams(hash);
-            return params.get("access_token");
+            return params.get("access_token"); // Haal het access_token
         }
 
         const accessToken = getTokenFromUrl();
+
         if (accessToken) {
             localStorage.setItem("spotify_access_token", accessToken);
-            console.log("Spotify token opgeslagen!");
-            window.location.href = "index.html"; // Terug naar de hoofdpagina
+            console.log("✅ Spotify token opgeslagen:", accessToken);
+            window.location.href = "index.html"; // Terug naar index.html
         } else {
-            console.error("Geen token gevonden in de URL!");
+            console.error("❌ Geen token gevonden in de URL!");
+            alert("Geen token gevonden! Controleer de URL.");
         }
     </script>
 </head>
 <body>
-    <p>Authenticatie succesvol! Je wordt teruggestuurd...</p>
+    <p>Authenticatie succesvol! Je wordt teruggestuurd naar de hoofdpagina...</p>
 </body>
 </html>
