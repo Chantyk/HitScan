@@ -1,59 +1,52 @@
-const client_id = "3e96f6baa32b4a98b1a3cb8d235d3d55";
-const redirect_uri = "https://chantyk.github.io/HitScan/callback.html";
-const scopes = "user-read-playback-state user-modify-playback-state streaming";
-
-// Functie om de gebruiker naar Spotify in te laten loggen
-function login() {
-    const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=token&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=${encodeURIComponent(scopes)}`;
-    window.location.href = authUrl;
+// Haal het access token uit localStorage
+const accessToken = localStorage.getItem("spotify_access_token");
+if (!accessToken) {
+    console.error("Geen geldig Spotify token. Gebruiker moet inloggen.");
+    window.location.href = "index.html"; // Redirect naar loginpagina als geen token
 }
 
-// Functie om een nummer af te spelen vanaf 30 sec
-async function playTrack(trackUri) {
-    const accessToken = localStorage.getItem("spotify_access_token");
-    if (!accessToken) {
-        console.error("Geen toegangstoken gevonden! Log eerst in.");
-        login();
-        return;
-    }
-
-    try {
-        // Actieve Spotify-apparaten ophalen
-        let response = await fetch("https://api.spotify.com/v1/me/player/devices", {
-            headers: { "Authorization": `Bearer ${accessToken}` }
-        });
-        let data = await response.json();
-
-        if (!data.devices || data.devices.length === 0) {
-            console.error("Geen actieve Spotify-apparaten gevonden. Open Spotify op een apparaat!");
-            return;
+// Functie om apparaten van de gebruiker op te halen
+function getSpotifyDevices() {
+    fetch("https://api.spotify.com/v1/me/player/devices", {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
         }
-
-        let deviceId = data.devices[0].id; // Kies het eerste beschikbare apparaat
-
-        // Track afspelen vanaf 30 sec
-        await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-            method: "PUT",
-            headers: {
-                "Authorization": `Bearer ${accessToken}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                uris: [trackUri],
-                position_ms: 30000 // Start op 30 sec
-            })
-        });
-
-        console.log("Track speelt af vanaf 30 seconden!");
-    } catch (error) {
-        console.error("Fout bij afspelen:", error);
-    }
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data); // Bekijk de apparaten in de console
+        if (data.devices.length > 0) {
+            playSong(data.devices[0].id); // Kies het eerste apparaat en speel de muziek af
+        } else {
+            console.error("Geen apparaten gevonden.");
+        }
+    })
+    .catch(error => console.error('Error bij ophalen apparaten:', error));
 }
 
-// Check bij laden of er een token is
-window.onload = function () {
-    const token = localStorage.getItem("spotify_access_token");
-    if (!token) {
-        console.log("Geen token gevonden. Gebruiker moet inloggen.");
-    }
+// Functie om muziek af te spelen
+function playSong(deviceId) {
+    const trackUri = "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp"; // Vervang door jouw track URI
+    const position_ms = 30000; // Start de muziek vanaf 30 seconden
+
+    fetch("https://api.spotify.com/v1/me/player/play", {
+        method: "PUT",
+        headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            device_ids: [deviceId], // Gebruik het geselecteerde apparaat
+            uris: [trackUri], // Specificeer de track URI
+            position_ms: position_ms // Start vanaf 30 seconden
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Muziek speelt vanaf 30 sec"))
+    .catch(error => console.error('Error bij afspelen:', error));
+}
+
+// Zorg ervoor dat we de apparaten ophalen zodra de pagina is geladen
+window.onload = function() {
+    getSpotifyDevices();
 };
