@@ -1,16 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HitScan Callback</title>
+    <title>Spotify Auth Callback</title>
+    <script>
+        function getTokenFromUrl() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            return params.get("access_token");
+        }
+
+        const accessToken = getTokenFromUrl();
+        if (accessToken) {
+            localStorage.setItem("spotify_access_token", accessToken);
+            console.log("Spotify token opgeslagen!");
+            window.location.href = "index.html"; // Terug naar de hoofdpagina
+        } else {
+            console.error("Geen token gevonden in de URL!");
+        }
+    </script>
 </head>
 <body>
-    <h1>Spotify Callback</h1>
-    <p>Je bent succesvol ingelogd. Je kunt de app nu gebruiken.</p>
-    <script>
-        // Dit script zorgt ervoor dat we na login de gebruiker terugsturen naar de hoofdpagina
-        window.location.href = 'https://chantyk.github.io/HitScan'; // Redirect naar de hoofdpagina
-    </script>
+    <p>Authenticatie succesvol! Je wordt teruggestuurd...</p>
 </body>
 </html>
