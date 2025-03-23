@@ -1,32 +1,73 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Auth Callback</title>
-    <script>
-        // Haal de access token uit de URL
-        function getTokenFromUrl() {
-            const hash = window.location.hash.substring(1); // Haal het gedeelte na #
-            const params = new URLSearchParams(hash);
-            return params.get("access_token"); // Haal het access_token
-        }
+const client_id = '3e96f6baa32b4a98b1a3cb8d235d3d55';
+const redirect_uri = 'https://chantyk.github.io/HitScan/callback.html';
 
-        const accessToken = getTokenFromUrl();
+// Functie om in te loggen bij Spotify
+function loginToSpotify() {
+    const scopes = [
+        "user-read-playback-state",     // Toegang om de afspeelstatus van de gebruiker te lezen
+        "user-modify-playback-state",   // Toegang om de afspeelstatus van de gebruiker te wijzigen
+        "streaming"                     // Toegang om muziek af te spelen
+    ];
 
-        if (accessToken) {
-            localStorage.setItem("spotify_access_token", accessToken);
-            console.log("✅ Spotify token opgeslagen:", accessToken);
+    const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=token&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=${encodeURIComponent(scopes.join(" "))}`;
 
-            // Na het opslaan van het token, doorsturen naar de pagina voor het afspelen
-            window.location.href = "index.html"; // Of direct naar een andere pagina als de app moet starten
-        } else {
-            console.error("❌ Geen token gevonden in de URL!");
-            alert("Geen token gevonden! Controleer de URL.");
-        }
-    </script>
-</head>
-<body>
-    <p>Authenticatie succesvol! Je wordt teruggestuurd naar de hoofdpagina...</p>
-</body>
-</html>
+    window.location.href = authUrl; // Redirect naar Spotify login
+}
+
+// Functie om de toegangstoken op te slaan en verder te gaan
+function setAccessToken() {
+    const urlParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = urlParams.get('access_token');
+    if (accessToken) {
+        localStorage.setItem('spotify_access_token', accessToken);  // Sla het access token op in localStorage
+        window.location.href = window.location.href.split("#")[0]; // Herlaad de pagina zonder hash
+    }
+}
+
+// Functie om de afspeelknop te tonen en muziek af te spelen
+function playSong() {
+    const trackId = new URLSearchParams(window.location.search).get('track');
+    const accessToken = localStorage.getItem('spotify_access_token');
+
+    if (trackId && accessToken) {
+        fetch("https://api.spotify.com/v1/me/player/play", {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                uris: [`spotify:track:${trackId}`],
+                position_ms: 30 * 1000 // Start bij 30 seconden
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Playing track from 30 seconds");
+            } else {
+                console.error("Error playing track:", response.status, response.statusText);
+            }
+        })
+        .catch(error => console.error("Error with Spotify API:", error));
+    }
+}
+
+// Functie die wordt aangeroepen zodra de pagina is geladen
+window.onload = function() {
+    const accessToken = localStorage.getItem("spotify_access_token");
+    const urlParams = new URLSearchParams(window.location.search);
+    const trackId = urlParams.get('track');
+
+    if (accessToken && trackId) {
+        // Als er een token en track ID zijn, speel het nummer af
+        document.getElementById('playBtn').style.display = 'block'; // Toon de afspeelknop
+        document.getElementById('loginBtn').style.display = 'none'; // Verberg de login knop
+    } else if (!accessToken) {
+        // Als er geen token is, toon de login knop
+        document.getElementById('loginBtn').style.display = 'block';
+        document.getElementById('playBtn').style.display = 'none';
+    }
+
+    // Probeer toegangstoken te verkrijgen als we via de callback komen
+    setAccessToken();
+};
