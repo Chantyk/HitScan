@@ -1,0 +1,11 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+#qr-reader {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
