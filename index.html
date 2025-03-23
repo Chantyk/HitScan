@@ -1,67 +1,17 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HitScan - Spotify</title>
-    <script>
-        // Functie om de Spotify login-URL te maken
-        function loginToSpotify() {
-            const client_id = "3e96f6baa32b4a98b1a3cb8d235d3d55";
-            const redirect_uri = "https://chantyk.github.io/HitScan/callback.html"; // Dit moet exact overeenkomen met wat je in je Spotify Developer Console hebt ingesteld
-            const scopes = [
-                "user-read-playback-state",
-                "user-modify-playback-state",
-                "streaming"
-            ];
-
-            // Spotify Authorize URL met parameters
-            const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=token&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=${encodeURIComponent(scopes.join(" "))}`;
-
-            console.log("Navigating to Spotify login URL:", authUrl); // Loggen van de URL om te zien of deze correct is
-
-            // Redirect naar de Spotify loginpagina
-            window.location.href = authUrl;
-        }
-
-        // Check of het token bestaat bij het laden van de pagina
-        window.onload = function() {
-            const accessToken = localStorage.getItem("spotify_access_token");
-
-            if (accessToken) {
-                // Token gevonden, ga naar het afspelen van de muziek
-                playSong(); // Speel muziek af vanaf 30 seconden
-            } else {
-                // Toon de login-knop als er geen token is
-                document.getElementById('loginBtn').style.display = 'block';
-            }
-        }
-
-        // Functie om muziek af te spelen vanaf 30 seconden
-        function playSong() {
-            const accessToken = localStorage.getItem("spotify_access_token");
-            const trackUri = "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp"; // Vervang met je eigen track URI
-            const position_ms = 30000; // Start de muziek vanaf 30 seconden
-
-            fetch("https://api.spotify.com/v1/me/player/play", {
-                method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    uris: [trackUri],
-                    position_ms: position_ms
-                })
-            })
-            .then(res => res.json())
-            .then(data => console.log("Muziek speelt vanaf 30 sec"))
-            .catch(error => console.error('Error bij afspelen:', error));
-        }
-    </script>
+    <title>HitScan</title>
 </head>
 <body>
-    <h1>HitScan - Spotify</h1>
+    <h1>HitScan</h1>
+    <p>Scan een QR-code om een nummer af te spelen!</p>
+
     <button id="loginBtn" style="display:none;" onclick="loginToSpotify()">Log in met Spotify</button>
+    <button id="playBtn" style="display:none;" onclick="playSong()">Speel af</button>
+
+    <script src="script.js"></script>
 </body>
 </html>
