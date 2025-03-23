@@ -46,4 +46,44 @@ function stopSong(accessToken) {
 
 // Functie voor wanneer een QR-code wordt gescand
 function onScanSuccess(decodedText) {
-  console.log("Scanned:
+  console.log("Scanned: " + decodedText);
+  
+  // Als het een Spotify-link is
+  if (decodedText.includes("spotify.com/track/")) {
+    const trackId = decodedText.split("/").pop();  // Haal de track ID uit de URL
+    const accessToken = localStorage.getItem('access_token'); // Haal het token op uit localStorage
+    
+    if (accessToken) {
+      playSongFrom30Seconds(accessToken, trackId);  // Speel het nummer vanaf 30 seconden af
+    } else {
+      alert("Je moet eerst inloggen.");
+    }
+  } else {
+    alert("Geen geldige Spotify-link!");
+  }
+}
+
+// QR-code scanner initialisatie
+function startQRCodeScanner() {
+  const html5QrCode = new Html5Qrcode("qr-reader");
+
+  html5QrCode.start(
+    { facingMode: "environment" },
+    {
+      fps: 10, // Frames per second
+      qrbox: 250, // Grootte van de QR-code scanbox
+    },
+    onScanSuccess
+  ).catch(err => {
+    console.error("QR-code scanner error:", err);
+  });
+}
+
+window.onload = function() {
+  const accessToken = localStorage.getItem('access_token');
+  if (accessToken) {
+    startQRCodeScanner();
+  } else {
+    window.location.href = 'https://chantyk.github.io/HitScan/callback.html';
+  }
+};
