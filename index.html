@@ -20,10 +20,45 @@
             // Redirect naar de Spotify inlogpagina
             window.location.href = authUrl;
         }
+
+        // Check of het token bestaat bij het laden van de pagina
+        window.onload = function() {
+            const accessToken = localStorage.getItem("spotify_access_token");
+
+            if (accessToken) {
+                // Token gevonden, ga naar het afspelen van de muziek
+                playSong(); // Speel muziek af vanaf 30 seconden
+            } else {
+                // Toon de login-knop als er geen token is
+                document.getElementById('loginBtn').style.display = 'block';
+            }
+        }
+
+        // Functie om muziek af te spelen vanaf 30 seconden
+        function playSong() {
+            const accessToken = localStorage.getItem("spotify_access_token");
+            const trackUri = "spotify:track:3n3Ppam7vgaVa1iaRUc9Lp"; // Vervang met je eigen track URI
+            const position_ms = 30000; // Start de muziek vanaf 30 seconden
+
+            fetch("https://api.spotify.com/v1/me/player/play", {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    uris: [trackUri],
+                    position_ms: position_ms
+                })
+            })
+            .then(res => res.json())
+            .then(data => console.log("Muziek speelt vanaf 30 sec"))
+            .catch(error => console.error('Error bij afspelen:', error));
+        }
     </script>
 </head>
 <body>
-    <h1>HitScan - Spotify Login</h1>
-    <button onclick="loginToSpotify()">Log in met Spotify</button>
+    <h1>HitScan - Spotify</h1>
+    <button id="loginBtn" style="display:none;" onclick="loginToSpotify()">Log in met Spotify</button>
 </body>
 </html>
