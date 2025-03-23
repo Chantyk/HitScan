@@ -11,9 +11,37 @@
 <body>
   <h1>Scan een QR-code om een nummer af te spelen vanaf 30 seconden!</h1>
 
-  <div id="qr-reader"></div>
+  <!-- QR-code scanner container -->
+  <div id="qr-reader" style="width: 100%; height: 500px;"></div>
   <p id="status"></p>
 
   <script src="script.js"></script>
+  <script>
+    // Functie voor het initialiseren van de QR-code scanner
+    function startQRCodeScanner() {
+      const html5QrCode = new Html5Qrcode("qr-reader");
+
+      html5QrCode.start(
+        { facingMode: "environment" },  // Gebruik de achtercamera
+        {
+          fps: 10, // Frames per second
+          qrbox: 250, // Grootte van de QR-code scanbox
+        },
+        onScanSuccess,  // Callback voor als de QR-code succesvol wordt gescand
+        function(errorMessage) {  // Callback voor als er een fout is
+          console.error("QR-code scanner error:", errorMessage);
+          document.getElementById('status').innerText = "Er is een fout opgetreden bij het laden van de scanner.";
+        }
+      ).catch(err => {
+        console.error("Fout bij het starten van de QR-code scanner:", err);
+        document.getElementById('status').innerText = "Er is een fout opgetreden bij het starten van de scanner.";
+      });
+    }
+
+    // Start de scanner zodra de pagina is geladen
+    window.onload = function() {
+      startQRCodeScanner();  // Initialiseer de QR-code scanner
+    };
+  </script>
 </body>
 </html>
