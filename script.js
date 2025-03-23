@@ -1,89 +1,69 @@
-// Functie om het nummer af te spelen vanaf 30 seconden
-function playSongFrom30Seconds(accessToken, trackId) {
-  const endpoint = `https://api.spotify.com/v1/me/player/play`;
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-    'Content-Type': 'application/json',
-  };
-  
-  const body = JSON.stringify({
-    uris: [`spotify:track:${trackId}`], // Spotify Track URI
-    position_ms: 30000, // Start vanaf 30 seconden (30.000 ms)
-  });
-
-  fetch(endpoint, {
-    method: 'PUT',
-    headers: headers,
-    body: body,
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log("Nummer wordt afgespeeld vanaf 30 seconden.");
+// Callbackfunctie voor succesvolle QR-code scan
+function onScanSuccess(decodedText, decodedResult) {
+    console.log(`QR code gescand: ${decodedText}`, decodedResult);
+    document.getElementById('status').innerText = `QR Code gescand: ${decodedText}`;
     
-    // Stop het nummer na 20 seconden (20.000 ms)
-    setTimeout(() => {
-      stopSong(accessToken);
-    }, 20000); // Stop het na 20 seconden
-  })
-  .catch(error => console.error("Fout bij afspelen nummer:", error));
+    // Functie om het nummer af te spelen in Spotify vanaf een specifieke tijd
+    playSpotifyTrack(decodedText);
 }
 
-// Functie om het nummer te stoppen
-function stopSong(accessToken) {
-  const endpoint = `https://api.spotify.com/v1/me/player/pause`;
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-  };
-
-  fetch(endpoint, {
-    method: 'PUT',
-    headers: headers,
-  })
-  .then(response => response.json())
-  .then(data => console.log("Nummer is gestopt."))
-  .catch(error => console.error("Fout bij stoppen nummer:", error));
+// Callbackfunctie voor fouten bij het scannen
+function onScanFailure(error) {
+    console.warn(`QR scan error: ${error}`);
+    document.getElementById('status').innerText = "QR-code kon niet worden gescand.";
 }
 
-// Functie voor wanneer een QR-code wordt gescand
-function onScanSuccess(decodedText) {
-  console.log("Scanned: " + decodedText);
-  
-  // Als het een Spotify-link is
-  if (decodedText.includes("spotify.com/track/")) {
-    const trackId = decodedText.split("/").pop();  // Haal de track ID uit de URL
-    const accessToken = localStorage.getItem('access_token'); // Haal het token op uit localStorage
+// Functie om Spotify-track af te spelen vanaf een specifieke tijd
+function playSpotifyTrack(trackId) {
+    const token = '3e96f6baa32b4a98b1a3cb8d235d3d55';  // Spotify access token
+    const trackUrl = `https://api.spotify.com/v1/tracks/${trackId}`;
     
-    if (accessToken) {
-      playSongFrom30Seconds(accessToken, trackId);  // Speel het nummer vanaf 30 seconden af
-    } else {
-      alert("Je moet eerst inloggen.");
-    }
-  } else {
-    alert("Geen geldige Spotify-link!");
-  }
+    fetch(trackUrl, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const trackUri = data.uri;
+        const audio = new Audio(`https://open.spotify.com/embed/track/${trackId}?autoplay=true&start=30`);
+        audio.play();
+        console.log('Track wordt afgespeeld vanaf 30 seconden');
+    })
+    .catch(error => {
+        console.error('Fout bij het afspelen van de track:', error);
+    });
 }
 
-// QR-code scanner initialisatie
+// Functie om de QR-code scanner te starten
 function startQRCodeScanner() {
-  const html5QrCode = new Html5Qrcode("qr-reader");
+    if (typeof Html5Qrcode === "undefined") {
+        console.error("Html5Qrcode bibliotheek is niet geladen.");
+        document.getElementById('status').innerText = "Er is een fout opgetreden bij het laden van de scanner bibliotheek.";
+        return;
+    }
 
-  html5QrCode.start(
-    { facingMode: "environment" },
-    {
-      fps: 10, // Frames per second
-      qrbox: 250, // Grootte van de QR-code scanbox
-    },
-    onScanSuccess
-  ).catch(err => {
-    console.error("QR-code scanner error:", err);
-  });
+    const html5QrCode = new Html5Qrcode("qr-reader");
+
+    // Start de QR-code scanner
+    html5QrCode.start(
+        { facingMode: "environment" },  // Gebruik de achtercamera
+        {
+            fps: 10, // Frames per second
+            qrbox: 250, // Grootte van de QR-code scanbox
+            rememberLastUsedCamera: true,  // Bewaar de laatste camera-instelling
+            formatsToSupport: ["QR_CODE"], // Specifieer welk type code je wilt scannen
+        },
+        onScanSuccess,  // Callback voor succesvolle scan
+        onScanFailure   // Callback voor fouten
+    ).catch(err => {
+        console.error("Fout bij het starten van de QR-code scanner:", err);
+        document.getElementById('status').innerText = "Er is een fout opgetreden bij het starten van de scanner.";
+    });
 }
 
+// Start de scanner wanneer de pagina is geladen
 window.onload = function() {
-  const accessToken = localStorage.getItem('access_token');
-  if (accessToken) {
     startQRCodeScanner();
-  } else {
-    window.location.href = 'https://chantyk.github.io/HitScan/callback.html';
-  }
 };
