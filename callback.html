@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Auth Callback</title>
-    <script>
-        function getTokenFromUrl() {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            return params.get("access_token");
-        }
-
-        const accessToken = getTokenFromUrl();
-        if (accessToken) {
-            localStorage.setItem("spotify_access_token", accessToken);
-            console.log("Spotify token opgeslagen!");
-            window.location.href = "index.html"; // Terug naar de hoofdpagina
-        } else {
-            console.error("Geen token gevonden in de URL!");
-        }
-    </script>
+    <title>Callback</title>
 </head>
 <body>
-    <p>Authenticatie succesvol! Je wordt teruggestuurd...</p>
+    <h1>Callback Pagina</h1>
+    <p>We wachten op je actie...</p>
+    
+    <script>
+        // Zet de access token in de localStorage zodat we deze later kunnen gebruiken
+        const accessToken = new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+        if (accessToken) {
+            localStorage.setItem("access_token", accessToken);
+            window.location.href = "index.html";  // Redirect naar de hoofd pagina
+        } else {
+            console.error("Geen access token gevonden.");
+        }
+    </script>
 </body>
 </html>
