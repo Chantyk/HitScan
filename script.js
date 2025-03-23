@@ -1,54 +1,49 @@
-const clientId = "3e96f6baa32b4a98b1a3cb8d235d3d55"; // Spotify client ID
-const redirectUri = "https://chantyk.github.io/HitScan/callback.html"; // Redirect URL
-const scope = "user-read-playback-state user-modify-playback-state streaming"; // Gewenste scope
+// Functie om het nummer af te spelen vanaf 30 seconden
+function playSongFrom30Seconds(accessToken, trackId) {
+  const endpoint = `https://api.spotify.com/v1/me/player/play`;
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
+  
+  const body = JSON.stringify({
+    uris: [`spotify:track:${trackId}`], // Spotify Track URI
+    position_ms: 30000, // Start vanaf 30 seconden (30.000 ms)
+  });
 
-// Maak de login URL aan voor Implicit Grant Flow
-const loginUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&show_dialog=true`;
-
-// Als de gebruiker op de login knop klikt, wordt deze doorgestuurd naar Spotify
-document.getElementById("login-btn").addEventListener("click", function() {
-    window.location.href = loginUrl;
-});
-
-// Controleer of de access token al in localStorage staat, indien ja, gebruik deze om af te spelen
-window.onload = function() {
-    const accessToken = localStorage.getItem("spotifyAccessToken");
-
-    if (accessToken) {
-        console.log("Token gevonden in localStorage: ", accessToken);
-        // Je kunt hier de logica toevoegen voor het afspelen van muziek, bijv. playSong(accessToken);
-    }
-};
-
-// Functie om muziek af te spelen
-function playSong(accessToken, trackId) {
-    const songData = {
-        uris: [`spotify:track:${trackId}`]  // Vervang dit door de track die je wilt afspelen
-    };
-
-    const playSongUrl = "https://api.spotify.com/v1/me/player/play";
-
-    fetch(playSongUrl, {
-        method: "PUT",
-        headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(songData)
-    })
-    .then(response => {
-        if (response.status === 401) {
-            // Als de token is verlopen, geef een melding
-            alert("Je sessie is verlopen. Log opnieuw in.");
-            window.location.href = "https://chantyk.github.io/HitScan/callback.html"; // Of naar login-pagina
-        } else {
-            return response.json();
-        }
-    })
-    .then(data => {
-        console.log("Nummer wordt afgespeeld:", data);
-    })
-    .catch(error => {
-        console.error("Fout bij afspelen nummer:", error);
-    });
+  fetch(endpoint, {
+    method: 'PUT',
+    headers: headers,
+    body: body,
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Nummer wordt afgespeeld vanaf 30 seconden.");
+    
+    // Stop het nummer na 20 seconden (20.000 ms)
+    setTimeout(() => {
+      stopSong(accessToken);
+    }, 20000); // Stop het na 20 seconden
+  })
+  .catch(error => console.error("Fout bij afspelen nummer:", error));
 }
+
+// Functie om het nummer te stoppen
+function stopSong(accessToken) {
+  const endpoint = `https://api.spotify.com/v1/me/player/pause`;
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+  };
+
+  fetch(endpoint, {
+    method: 'PUT',
+    headers: headers,
+  })
+  .then(response => response.json())
+  .then(data => console.log("Nummer is gestopt."))
+  .catch(error => console.error("Fout bij stoppen nummer:", error));
+}
+
+// Functie voor wanneer een QR-code wordt gescand
+function onScanSuccess(decodedText) {
+  console.log("Scanned:
