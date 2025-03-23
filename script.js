@@ -1,6 +1,6 @@
 function loginWithSpotify() {
     const clientId = "3e96f6baa32b4a98b1a3cb8d235d3d55";
-    const redirectUri = "https://chantyk.github.io/HitScan/callback";
+    const redirectUri = "https://chantyk.github.io/HitScan/callback.html";
     const scopes = "user-read-playback-state user-modify-playback-state streaming";
 
     const authUrl = `https://accounts.spotify.com/authorize?` +
