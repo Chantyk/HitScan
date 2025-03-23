@@ -3,12 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify QR Player</title>
+    <title>HitScan - Spotify</title>
+    <script>
+        // Functie om de Spotify login-URL te maken
+        function loginToSpotify() {
+            const client_id = "3e96f6baa32b4a98b1a3cb8d235d3d55";
+            const redirect_uri = "https://chantyk.github.io/HitScan/callback.html";
+            const scopes = [
+                "user-read-playback-state",
+                "user-modify-playback-state",
+                "streaming"  // Noodzakelijk om af te spelen
+            ];
+
+            const authUrl = `https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=token&redirect_uri=${encodeURIComponent(redirect_uri)}&scope=${encodeURIComponent(scopes.join(" "))}`;
+
+            // Redirect naar de Spotify inlogpagina
+            window.location.href = authUrl;
+        }
+    </script>
 </head>
 <body>
-    <h1>Druk op de knop om het nummer te starten!</h1>
-    <button id="playButton">Speel nummer af</button>
-
-    <script src="script.js"></script>
+    <h1>HitScan - Spotify Login</h1>
+    <button onclick="loginToSpotify()">Log in met Spotify</button>
 </body>
 </html>
